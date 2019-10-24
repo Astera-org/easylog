@@ -1,6 +1,7 @@
 package easylog
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -19,7 +20,7 @@ var (
 	level    LogLevel
 	logger   *log.Logger
 	fp       *os.File
-	maxSize  int
+	maxSize  int64
 	filePath string
 	fileName string
 	mutex    sync.Mutex
@@ -32,10 +33,10 @@ func init() {
 	fileName = fmt.Sprintf("%s.log", os.Args[0])
 }
 
-func Init(options ...func()) {
+func Init(options ...func()) error {
 
 	if logInit {
-		return
+		return nil
 	}
 
 	for _, f := range options {
@@ -45,10 +46,12 @@ func Init(options ...func()) {
 	checkFile()
 
 	if logger == nil {
-		panic("logger is nil pointer")
+		return errors.New("nil logger")
 	}
 
 	logInit = true
+
+	return nil
 }
 
 func Debug(msg string, v ...interface{}) {
@@ -156,15 +159,11 @@ func isFileMax(fp *os.File) bool {
 		panic(err)
 	}
 
-	if info.Size() >= getMaxByte() {
+	if info.Size() >= maxSize {
 		return true
 	}
 
 	return false
-}
-
-func getMaxByte() int64 {
-	return int64(maxSize) * 1024 * 1024 // MB to Byte
 }
 
 func openFile(path string, name string) error {
@@ -186,7 +185,7 @@ func SetLevel(lv LogLevel) func() {
 
 func SetMaxSize(size int) func() {
 	return func() {
-		maxSize = size
+		maxSize = int64(size) << (10 * 2) // MB to Byte
 	}
 }
 

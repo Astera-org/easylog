@@ -10,12 +10,14 @@ func main() {
 
 	wg := new(sync.WaitGroup)
 
-	log.Init(
+	if err := log.Init(
 		log.SetLevel(log.DEBUG),
 		log.SetFilePath("./"),
 		log.SetFileName("test.log"),
 		log.SetMaxSize(1),
-	)
+	); err != nil {
+		panic(err)
+	}
 
 	for i := 0; i < 10; i++ {
 		wg.Add(1)
