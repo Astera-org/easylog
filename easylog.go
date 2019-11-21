@@ -11,7 +11,7 @@ import (
 
 const (
 	defaultLevel    = DEBUG
-	defaultMaxSize  = 100
+	defaultMaxSize  = 100 << (10 * 2) // MB
 	defaultFilePath = "./"
 )
 
