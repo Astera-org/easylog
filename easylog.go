@@ -34,7 +34,6 @@ func init() {
 }
 
 func Init(options ...func()) error {
-
 	if logInit {
 		return nil
 	}
@@ -42,7 +41,6 @@ func Init(options ...func()) error {
 	for _, f := range options {
 		f()
 	}
-
 	checkFile()
 
 	if logger == nil {
@@ -50,7 +48,6 @@ func Init(options ...func()) error {
 	}
 
 	logInit = true
-
 	return nil
 }
 
@@ -111,15 +108,12 @@ func checkFile() {
 
 	if isFileMax(fp) {
 		closeFile()
-
 		if err := renameFile(); err != nil {
 			panic(err)
 		}
-
 		if err := openFile(filePath, fileName); err != nil {
 			panic(err)
 		}
-
 		setNewLogger(fp)
 	}
 
@@ -147,9 +141,7 @@ func closeFile() {
 	if fp == nil {
 		return
 	}
-
 	fp.Close()
-
 	fp = nil
 }
 

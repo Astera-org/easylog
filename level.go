@@ -13,7 +13,6 @@ const (
 var levelFmt map[LogLevel]string
 
 func init() {
-
 	levelFmt = make(map[LogLevel]string)
 
 	levelFmt[DEBUG] = "LV 1"

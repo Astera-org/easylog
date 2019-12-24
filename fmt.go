@@ -13,7 +13,6 @@ const (
 )
 
 func format(lv LogLevel, msg string) string {
-
 	fmt := logFmt
 
 	fmt = strings.Replace(fmt, "TIME", time.Now().Format(timeFmt), 1)
