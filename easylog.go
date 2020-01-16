@@ -10,9 +10,9 @@ import (
 )
 
 const (
-	defaultLevel    = DEBUG
-	defaultMaxSize  = 100 << (10 * 2) // MB
-	defaultFilePath = "./"
+	defaultLevel    LogLevel = DEBUG
+	defaultMaxSize           = 100 << (10 * 2) // MB
+	defaultFilePath          = "./"
 )
 
 var (
