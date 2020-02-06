@@ -129,7 +129,6 @@ func renameFile() error {
 	if err := os.Rename(old, new); err != nil {
 		return err
 	}
-
 	return nil
 }
 
@@ -154,7 +153,6 @@ func isFileMax(fp *os.File) bool {
 	if info.Size() >= maxSize {
 		return true
 	}
-
 	return false
 }
 
@@ -165,7 +163,6 @@ func openFile(path string, name string) error {
 	if err != nil {
 		return err
 	}
-
 	return nil
 }
 
