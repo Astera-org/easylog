@@ -22,7 +22,7 @@ func main() {
     if err := log.Init(
         log.SetLevel(log.DEBUG),				// set level to ouput
         log.SetFilePath("./"),					// set log file path
-        log.SetFileName("easylog.log"),			 // set log file name
+        log.SetFileName("easylog.log"),				// set log file name
         log.SetMaxSize(1),	// MB				// set max size of log files
     ); if err != nil {
         panic(err)
