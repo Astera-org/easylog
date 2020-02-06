@@ -1,6 +1,6 @@
 # EasyLog
 
-A Simple & Easy Logger for Go(golang). EasyLog is highly stable and thread-safety because it uses built-in [log](https://godoc.org/log) package in Go.
+A Simple & Easy Logging package for Go(golang). EasyLog is highly stable and thread-safety because it uses built-in [log](https://godoc.org/log) package in Go.
 
 ## Installation
 
@@ -44,7 +44,7 @@ Five levels defined below.
 - ERROR (3)
 - FATAL (4)
 
-You can set one of them for output level. And you. Each function for levels allows you to output messages to level you want: `log.Debug()` `log.Info()` `log.Warn()` `log.Error()` `log.Fatal()`. The `log.Fatal()`, like built-in log package, outputs a message and then terminates the program.
+You can set one of them for output level. Each function for levels allows you to output messages to level you want: `log.Debug()` `log.Info()` `log.Warn()` `log.Error()` `log.Fatal()`. The `log.Fatal()`, like built-in log package, outputs a message and then terminates the program.
 
 ### MaxSize (default: 1 MB)
 
