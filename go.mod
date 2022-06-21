@@ -1,3 +1,3 @@
-module github.com/zajann/easylog
+module github.com/Astera-org/easylog
 
 go 1.12
