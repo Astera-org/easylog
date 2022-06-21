@@ -3,7 +3,7 @@ package main
 import (
 	"sync"
 
-	log "github.com/zajann/easylog"
+	log "github.com/Astera-org/easylog"
 )
 
 func main() {

@@ -15,9 +15,9 @@ var levelFmt map[LogLevel]string
 func init() {
 	levelFmt = make(map[LogLevel]string)
 
-	levelFmt[DEBUG] = "LV 0"
-	levelFmt[INFO] = "LV 1"
-	levelFmt[WARN] = "LV 2"
-	levelFmt[ERROR] = "LV 3"
-	levelFmt[FATAL] = "LV 4"
+	levelFmt[DEBUG] = "Debug"
+	levelFmt[INFO] = "Info"
+	levelFmt[WARN] = "Warn"
+	levelFmt[ERROR] = "Error"
+	levelFmt[FATAL] = "Fatal"
 }

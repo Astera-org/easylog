@@ -1,6 +1,6 @@
 # EasyLog
 
-A Simple & Easy Logging package for Go(golang). EasyLog is highly stable and thread-safety because it uses built-in [log](https://godoc.org/log) package in Go.
+A Simple & Easy Logging package for Go(golang). EasyLog is highly stable and thread-safe because it uses built-in [log](https://godoc.org/log) package in Go.
 
 ## Installation
 
@@ -52,7 +52,7 @@ You can set max size of log files in megabytes with `log.SetMaxSize()`. If log f
 
 ### Log Format
 
-Now, it is fixed at `[Time], [Level], [PID], [Message]` as blow. It will be updated so that users can set it up soon.
+Now, it is fixed at `[Time], [Level], [PID], [Message]` as below. It will be updated so that users can set it up soon.
 
 ![](screen/log-format-sample.PNG)
 

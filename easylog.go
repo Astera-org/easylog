@@ -56,6 +56,7 @@ func Debug(msg string, v ...interface{}) {
 
 	if level <= DEBUG {
 		fmtMsg := format(DEBUG, msg)
+		fmt.Println(fmtMsg)
 		logger.Printf(fmtMsg, v...)
 	}
 }
@@ -65,6 +66,7 @@ func Info(msg string, v ...interface{}) {
 
 	if level <= INFO {
 		fmtMsg := format(INFO, msg)
+		fmt.Println(fmtMsg)
 		logger.Printf(fmtMsg, v...)
 	}
 }
@@ -74,6 +76,7 @@ func Warn(msg string, v ...interface{}) {
 
 	if level <= WARN {
 		fmtMsg := format(WARN, msg)
+		fmt.Println(fmtMsg)
 		logger.Printf(fmtMsg, v...)
 	}
 }
@@ -83,6 +86,7 @@ func Error(msg string, v ...interface{}) {
 
 	if level <= ERROR {
 		fmtMsg := format(ERROR, msg)
+		fmt.Println(fmtMsg)
 		logger.Printf(fmtMsg, v...)
 	}
 }
@@ -92,6 +96,7 @@ func Fatal(msg string, v ...interface{}) {
 
 	if level <= FATAL {
 		fmtMsg := format(FATAL, msg)
+		fmt.Println(fmtMsg)
 		logger.Fatalf(fmtMsg, v...)
 	}
 }
