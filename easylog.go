@@ -51,53 +51,54 @@ func Init(options ...func()) error {
 	return nil
 }
 
-func Debug(msg string, v ...interface{}) {
-	checkFile()
-
+func Debug(a ...any) {
 	if level <= DEBUG {
+		checkFile()
+		msg := fmt.Sprint(a...)
 		fmtMsg := format(DEBUG, msg)
 		fmt.Println(fmtMsg)
-		logger.Printf(fmtMsg, v...)
+		logger.Println(fmtMsg)
 	}
 }
 
-func Info(msg string, v ...interface{}) {
-	checkFile()
-
+func Info(a ...any) {
 	if level <= INFO {
+		checkFile()
+		msg := fmt.Sprint(a...)
 		fmtMsg := format(INFO, msg)
 		fmt.Println(fmtMsg)
-		logger.Printf(fmtMsg, v...)
+		logger.Println(fmtMsg)
 	}
 }
 
-func Warn(msg string, v ...interface{}) {
-	checkFile()
-
+func Warn(a ...any) {
 	if level <= WARN {
+		checkFile()
+		msg := fmt.Sprint(a...)
 		fmtMsg := format(WARN, msg)
 		fmt.Println(fmtMsg)
-		logger.Printf(fmtMsg, v...)
+		logger.Println(fmtMsg)
 	}
 }
 
-func Error(msg string, v ...interface{}) {
-	checkFile()
-
+func Error(a ...any) {
 	if level <= ERROR {
+		checkFile()
+		msg := fmt.Sprint(a...)
 		fmtMsg := format(ERROR, msg)
 		fmt.Println(fmtMsg)
-		logger.Printf(fmtMsg, v...)
+		logger.Println(fmtMsg)
 	}
 }
 
-func Fatal(msg string, v ...interface{}) {
-	checkFile()
+func Fatal(a ...any) {
 
 	if level <= FATAL {
+		checkFile()
+		msg := fmt.Sprint(a...)
 		fmtMsg := format(FATAL, msg)
 		fmt.Println(fmtMsg)
-		logger.Fatalf(fmtMsg, v...)
+		logger.Println(fmtMsg)
 	}
 }
 

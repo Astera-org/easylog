@@ -24,7 +24,7 @@ func main() {
 			defer wg.Done()
 
 			for j := 0; j < 100; j++ {
-				log.Info("EXAMPLE: %d", j)
+				log.Info("EXAMPLE: ", j)
 			}
 		}()
 	}
