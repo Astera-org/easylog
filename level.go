@@ -1,5 +1,7 @@
 package easylog
 
+import "strings"
+
 type LogLevel int
 
 const (
@@ -20,4 +22,21 @@ func init() {
 	levelFmt[WARN] = "Warn"
 	levelFmt[ERROR] = "Error"
 	levelFmt[FATAL] = "Fatal"
+}
+
+func GetLevel(level string) LogLevel {
+	switch strings.ToLower(level) {
+	case "debug":
+		return DEBUG
+	case "info":
+		return INFO
+	case "warn":
+		return WARN
+	case "error":
+		return ERROR
+	case "fatal":
+		return FATAL
+	default:
+		return DEBUG
+	}
 }
