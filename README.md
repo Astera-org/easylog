@@ -5,7 +5,7 @@ A Simple & Easy Logging package for Go(golang). EasyLog is highly stable and thr
 ## Installation
 
 ``` bash
-$ go get github.com/zajann/easylog
+$ go get github.com/Astera-org/easylog
 ```
 
 ## Usage
@@ -14,7 +14,7 @@ $ go get github.com/zajann/easylog
 package main
 
 import (
-	log "github.com/zajann/easylog"
+	log "github.com/Astera-org/easylog"
 )
 
 func main() {
@@ -27,7 +27,7 @@ func main() {
     ); if err != nil {
         panic(err)
     }
- 	
+
     log.Info("Hello, easylog !")
 }
 ```

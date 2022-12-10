@@ -5,14 +5,15 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"path/filepath"
 	"sync"
 	"time"
 )
 
 const (
-	defaultLevel    LogLevel = DEBUG
-	defaultMaxSize           = 100 << (10 * 2) // MB
-	defaultFilePath          = "./"
+	defaultLevel   LogLevel = DEBUG
+	defaultMaxSize          = 100 << (10 * 2) // MB
+	defaultDir              = ""
 )
 
 var (
@@ -21,7 +22,7 @@ var (
 	logger   *log.Logger
 	fp       *os.File
 	maxSize  int64
-	filePath string
+	dir      string
 	fileName string
 	mutex    sync.Mutex
 )
@@ -29,8 +30,18 @@ var (
 func init() {
 	level = defaultLevel
 	maxSize = defaultMaxSize
-	filePath = defaultFilePath
-	fileName = fmt.Sprintf("%s.log", os.Args[0])
+	dir = defaultDir
+	fileName = fmt.Sprintf("%s.log", filepath.Base(os.Args[0]))
+}
+
+func Logger() *log.Logger {
+	return logger
+}
+
+func check(err error) {
+	if err != nil {
+		panic(err)
+	}
 }
 
 func Init(options ...func()) error {
@@ -41,7 +52,9 @@ func Init(options ...func()) error {
 	for _, f := range options {
 		f()
 	}
-	checkFile()
+	if err := checkFile(); err != nil {
+		return err
+	}
 
 	if logger == nil {
 		return errors.New("nil logger")
@@ -53,7 +66,7 @@ func Init(options ...func()) error {
 
 func Debug(a ...any) {
 	if level <= DEBUG {
-		checkFile()
+		check(checkFile())
 		msg := fmt.Sprint(a...)
 		fmtMsg := format(DEBUG, msg)
 		fmt.Println(fmtMsg)
@@ -63,7 +76,7 @@ func Debug(a ...any) {
 
 func Info(a ...any) {
 	if level <= INFO {
-		checkFile()
+		check(checkFile())
 		msg := fmt.Sprint(a...)
 		fmtMsg := format(INFO, msg)
 		fmt.Println(fmtMsg)
@@ -73,7 +86,7 @@ func Info(a ...any) {
 
 func Warn(a ...any) {
 	if level <= WARN {
-		checkFile()
+		check(checkFile())
 		msg := fmt.Sprint(a...)
 		fmtMsg := format(WARN, msg)
 		fmt.Println(fmtMsg)
@@ -83,7 +96,7 @@ func Warn(a ...any) {
 
 func Error(a ...any) {
 	if level <= ERROR {
-		checkFile()
+		check(checkFile())
 		msg := fmt.Sprint(a...)
 		fmtMsg := format(ERROR, msg)
 		fmt.Println(fmtMsg)
@@ -92,9 +105,8 @@ func Error(a ...any) {
 }
 
 func Fatal(a ...any) {
-
 	if level <= FATAL {
-		checkFile()
+		check(checkFile())
 		msg := fmt.Sprint(a...)
 		fmtMsg := format(FATAL, msg)
 		fmt.Println(fmtMsg)
@@ -102,23 +114,23 @@ func Fatal(a ...any) {
 	}
 }
 
-func checkFile() {
+func checkFile() error {
 	mutex.Lock()
 	defer mutex.Unlock()
 
 	if fp == nil {
-		if err := openFile(filePath, fileName); err != nil {
-			panic(err)
+		if err := openFile(dir, fileName); err != nil {
+			return err
 		}
 	}
 
 	if isFileMax(fp) {
 		closeFile()
 		if err := renameFile(); err != nil {
-			panic(err)
+			return err
 		}
-		if err := openFile(filePath, fileName); err != nil {
-			panic(err)
+		if err := openFile(dir, fileName); err != nil {
+			return err
 		}
 		setNewLogger(fp)
 	}
@@ -126,11 +138,12 @@ func checkFile() {
 	if logger == nil {
 		setNewLogger(fp)
 	}
+	return nil
 }
 
 func renameFile() error {
-	old := fmt.Sprintf("%s/%s", filePath, fileName)
-	new := fmt.Sprintf("%s/%s.bak.%s", filePath, fileName, time.Now().Format("20060102150405"))
+	old := filepath.Join(dir, fileName)
+	new := fmt.Sprintf("%s.bak.%s", filepath.Join(dir, fileName), time.Now().Format("20060102150405"))
 
 	if err := os.Rename(old, new); err != nil {
 		return err
@@ -162,10 +175,10 @@ func isFileMax(fp *os.File) bool {
 	return false
 }
 
-func openFile(path string, name string) error {
+func openFile(dir, name string) error {
 	var err error
 
-	fp, err = os.OpenFile(fmt.Sprintf("%s/%s", path, name), os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	fp, err = os.OpenFile(filepath.Join(dir, name), os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 	if err != nil {
 		return err
 	}
@@ -184,9 +197,9 @@ func SetMaxSize(size int) func() {
 	}
 }
 
-func SetFilePath(path string) func() {
+func SetDir(newDir string) func() {
 	return func() {
-		filePath = path
+		dir = newDir
 	}
 }
 
