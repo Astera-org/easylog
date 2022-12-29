@@ -17,7 +17,6 @@ const (
 )
 
 var (
-	logInit  bool = false
 	level    LogLevel
 	logger   *log.Logger
 	fp       *os.File
@@ -27,11 +26,24 @@ var (
 	mutex    sync.Mutex
 )
 
-func init() {
+func Init(name string, directory string) error {
 	level = defaultLevel
 	maxSize = defaultMaxSize
-	dir = defaultDir
-	fileName = fmt.Sprintf("%s.log", filepath.Base(os.Args[0]))
+	dir = directory
+	if name == "" {
+		fileName = fmt.Sprintf("%s.log", filepath.Base(os.Args[0]))
+	} else {
+		fileName = name
+	}
+
+	if err := checkFile(); err != nil {
+		return err
+	}
+	if logger == nil {
+		return errors.New("nil logger")
+	}
+
+	return nil
 }
 
 func Logger() *log.Logger {
@@ -42,26 +54,6 @@ func check(err error) {
 	if err != nil {
 		panic(err)
 	}
-}
-
-func Init(options ...func()) error {
-	if logInit {
-		return nil
-	}
-
-	for _, f := range options {
-		f()
-	}
-	if err := checkFile(); err != nil {
-		return err
-	}
-
-	if logger == nil {
-		return errors.New("nil logger")
-	}
-
-	logInit = true
-	return nil
 }
 
 func Debug(a ...any) {
@@ -189,26 +181,10 @@ func GetLevel() LogLevel {
 	return level
 }
 
-func SetLevel(lv LogLevel) func() {
-	return func() {
-		level = lv
-	}
+func SetLevel(lv LogLevel) {
+	level = lv
 }
 
-func SetMaxSize(size int) func() {
-	return func() {
-		maxSize = int64(size) << (10 * 2) // MB to Byte
-	}
-}
-
-func SetDir(newDir string) func() {
-	return func() {
-		dir = newDir
-	}
-}
-
-func SetFileName(name string) func() {
-	return func() {
-		fileName = name
-	}
+func SetMaxSize(size int) {
+	maxSize = int64(size) << (10 * 2) // MB to Byte
 }
