@@ -24,6 +24,10 @@ func init() {
 	levelFmt[FATAL] = "Fatal"
 }
 
+func GetLevelStr(level LogLevel) string {
+	return levelFmt[level]
+}
+
 func GetLevel(level string) LogLevel {
 	switch strings.ToLower(level) {
 	case "debug":
@@ -37,6 +41,6 @@ func GetLevel(level string) LogLevel {
 	case "fatal":
 		return FATAL
 	default:
-		return DEBUG
+		return INFO
 	}
 }
