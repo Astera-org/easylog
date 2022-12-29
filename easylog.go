@@ -185,6 +185,10 @@ func openFile(dir, name string) error {
 	return nil
 }
 
+func GetLevel() LogLevel {
+	return level
+}
+
 func SetLevel(lv LogLevel) func() {
 	return func() {
 		level = lv
