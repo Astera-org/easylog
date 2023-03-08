@@ -1,49 +1,34 @@
 package easylog
 
 import (
-	"errors"
 	"fmt"
+	"io"
 	"log"
 	"os"
-	"path/filepath"
 	"sync"
 	"time"
 )
 
 const (
 	defaultLevel   LogLevel = DEBUG
-	defaultMaxSize          = 100 << (10 * 2) // MB
-	defaultDir              = ""
+	defaultMaxSize          = int64(100 << (10 * 2)) // MB
 )
 
 var (
-	level    LogLevel
+	level    LogLevel = defaultLevel
 	logger   *log.Logger
 	fp       *os.File
-	maxSize  int64
-	dir      string
-	fileName string
+	maxSize  int64 = defaultMaxSize
+	filePath string
 	mutex    sync.Mutex
+	stdout   *os.File = os.Stdout
 )
 
-func Init(name string, directory string) error {
-	level = defaultLevel
-	maxSize = defaultMaxSize
-	dir = directory
-	if name == "" {
-		fileName = fmt.Sprintf("%s.log", filepath.Base(os.Args[0]))
-	} else {
-		fileName = name
-	}
-
-	if err := checkFile(); err != nil {
-		return err
-	}
-	if logger == nil {
-		return errors.New("nil logger")
-	}
-
-	return nil
+// logFilePath = "" means only log to stdout
+func Init(logFilePath string) error {
+	closeFile()
+	filePath = logFilePath
+	return checkFile(false)
 }
 
 func Logger() *log.Logger {
@@ -56,95 +41,103 @@ func check(err error) {
 	}
 }
 
-func Debug(a ...any) {
-	if level <= DEBUG {
-		check(checkFile())
-		msg := fmt.Sprint(a...)
-		fmtMsg := format(DEBUG, msg)
-		fmt.Println(fmtMsg)
-		logger.Println(fmtMsg)
+func logAt(l LogLevel, a ...any) {
+	if l < level {
+		return
 	}
+	check(checkFile(false))
+	sprintArgs := []interface{}{levelFmt[l], ": "}
+	sprintArgs = append(sprintArgs, a...)
+	msg := fmt.Sprint(sprintArgs...)
+	logger.Output(3, msg)
+}
+
+func logAtf(l LogLevel, format string, a ...any) {
+	if l < level {
+		return
+	}
+	check(checkFile(false))
+	msg := fmt.Sprintf("%s: %s", levelFmt[l], fmt.Sprintf(format, a...))
+	logger.Output(3, msg)
+}
+
+func Debug(a ...any) {
+	logAt(DEBUG, a...)
 }
 
 func Info(a ...any) {
-	if level <= INFO {
-		check(checkFile())
-		msg := fmt.Sprint(a...)
-		fmtMsg := format(INFO, msg)
-		fmt.Println(fmtMsg)
-		logger.Println(fmtMsg)
-	}
+	logAt(INFO, a...)
 }
 
 func Warn(a ...any) {
-	if level <= WARN {
-		check(checkFile())
-		msg := fmt.Sprint(a...)
-		fmtMsg := format(WARN, msg)
-		fmt.Println(fmtMsg)
-		logger.Println(fmtMsg)
-	}
+	logAt(WARN, a...)
 }
 
 func Error(a ...any) {
-	if level <= ERROR {
-		check(checkFile())
-		msg := fmt.Sprint(a...)
-		fmtMsg := format(ERROR, msg)
-		fmt.Println(fmtMsg)
-		logger.Println(fmtMsg)
-	}
+	logAt(ERROR, a...)
 }
 
 func Fatal(a ...any) {
-	if level <= FATAL {
-		check(checkFile())
-		msg := fmt.Sprint(a...)
-		fmtMsg := format(FATAL, msg)
-		fmt.Println(fmtMsg)
-		logger.Println(fmtMsg)
-	}
+	logAt(FATAL, a...)
+	// TODO: panic?
 }
 
-func checkFile() error {
-	mutex.Lock()
-	defer mutex.Unlock()
+func Debugf(format string, a ...any) {
+	logAtf(DEBUG, format, a...)
+}
+
+func Infof(format string, a ...any) {
+	logAtf(INFO, format, a...)
+}
+
+func Warnf(format string, a ...any) {
+	logAtf(WARN, format, a...)
+}
+
+func Errorf(format string, a ...any) {
+	logAtf(ERROR, format, a...)
+}
+
+func Fatalf(format string, a ...any) {
+	logAtf(FATAL, format, a...)
+}
+
+func checkFile(locked bool) error {
+	if !locked {
+		mutex.Lock()
+		defer mutex.Unlock()
+	}
+	var err error
 
 	if fp == nil {
-		if err := openFile(dir, fileName); err != nil {
-			return err
+		var writer io.Writer
+		if filePath == "" {
+			fp = stdout
+			writer = stdout
+		} else {
+			if fp, err = os.OpenFile(filePath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666); err != nil {
+				return err
+			}
+			writer = io.MultiWriter(stdout, fp)
 		}
+		logger = log.New(writer, "", log.Ldate|log.Ltime|log.Lshortfile|log.LUTC)
 	}
 
-	if isFileMax(fp) {
-		closeFile()
-		if err := renameFile(); err != nil {
-			return err
-		}
-		if err := openFile(dir, fileName); err != nil {
-			return err
-		}
-		setNewLogger(fp)
-	}
-
-	if logger == nil {
-		setNewLogger(fp)
-	}
-	return nil
-}
-
-func renameFile() error {
-	old := filepath.Join(dir, fileName)
-	new := fmt.Sprintf("%s.bak.%s", filepath.Join(dir, fileName), time.Now().Format("20060102150405"))
-
-	if err := os.Rename(old, new); err != nil {
+	info, err := fp.Stat()
+	if err != nil {
 		return err
 	}
-	return nil
-}
 
-func setNewLogger(fp *os.File) {
-	logger = log.New(fp, "", 0)
+	if info.Size() >= maxSize {
+		closeFile()
+		new := fmt.Sprintf("%s.bak.%s", filePath, time.Now().Format("20060102150405"))
+		if err = os.Rename(filePath, new); err != nil {
+			return err
+		}
+		return checkFile(true)
+	}
+
+	return nil
 }
 
 func closeFile() {
@@ -155,28 +148,6 @@ func closeFile() {
 	fp = nil
 }
 
-func isFileMax(fp *os.File) bool {
-	info, err := fp.Stat()
-	if err != nil {
-		panic(err)
-	}
-
-	if info.Size() >= maxSize {
-		return true
-	}
-	return false
-}
-
-func openFile(dir, name string) error {
-	var err error
-
-	fp, err = os.OpenFile(filepath.Join(dir, name), os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
 func GetLevel() LogLevel {
 	return level
 }
@@ -185,6 +156,11 @@ func SetLevel(lv LogLevel) {
 	level = lv
 }
 
-func SetMaxSize(size int) {
-	maxSize = int64(size) << (10 * 2) // MB to Byte
+func SetMaxSize(sizeMiB int) {
+	if sizeMiB <= 0 {
+		maxSize = defaultMaxSize
+		Error("SetMaxSize: sizeMiB must be greater than 0, using default value: ", defaultMaxSize)
+	} else {
+		maxSize = int64(sizeMiB) << (10 * 2) // MiB to Byte
+	}
 }
