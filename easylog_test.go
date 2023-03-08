@@ -37,6 +37,11 @@ func setUpTest(t *testing.T) {
 	require.NoError(t, err)
 	stdout = devNull
 	t.Cleanup(func() {
+		level = defaultLevel
+		logger = nil
+		fp = nil
+		maxSize = defaultMaxSizeBytes
+		filePath = ""
 		stdout = os.Stdout
 	})
 
@@ -111,19 +116,19 @@ func TestMaxSize(t *testing.T) {
 	setUpTest(t)
 
 	SetMaxSize(0)
-	assert.Equal(t, defaultMaxSize, maxSize)
+	assert.Equal(t, defaultMaxSizeBytes, maxSize)
 
 	// Check that the log file is rotated when it reaches the max size.
 	logFile, err := os.OpenFile(filePath, os.O_WRONLY, 0666)
 	require.NoError(t, err)
-	const maxSize = 1 << (10 * 2)
-	SetMaxSize(maxSize >> (10 * 2))
-	written, err := io.Copy(logFile, &AReader{max: maxSize})
+	const maxSizeBytes = 1 << (10 * 2)
+	SetMaxSize(maxSizeBytes >> (10 * 2))
+	written, err := io.Copy(logFile, &AReader{max: maxSizeBytes})
 	require.NoError(t, err)
-	assert.Equal(t, int64(maxSize), written)
+	assert.Equal(t, int64(maxSizeBytes), written)
 	info, err := logFile.Stat()
 	require.NoError(t, err)
-	assert.Equal(t, int64(maxSize), info.Size())
+	assert.Equal(t, int64(maxSizeBytes), info.Size())
 	require.NoError(t, logFile.Close())
 
 	Info("FFF")

@@ -10,15 +10,15 @@ import (
 )
 
 const (
-	defaultLevel   LogLevel = DEBUG
-	defaultMaxSize          = int64(100 << (10 * 2)) // MB
+	defaultLevel        = DEBUG
+	defaultMaxSizeBytes = int64(100 << (10 * 2)) // 100 MiB
 )
 
 var (
 	level    LogLevel = defaultLevel
 	logger   *log.Logger
 	fp       *os.File
-	maxSize  int64 = defaultMaxSize
+	maxSize  int64 = defaultMaxSizeBytes
 	filePath string
 	mutex    sync.Mutex
 	stdout   *os.File = os.Stdout
@@ -158,8 +158,8 @@ func SetLevel(lv LogLevel) {
 
 func SetMaxSize(sizeMiB int) {
 	if sizeMiB <= 0 {
-		maxSize = defaultMaxSize
-		Error("SetMaxSize: sizeMiB must be greater than 0, using default value: ", defaultMaxSize)
+		maxSize = defaultMaxSizeBytes
+		Error("SetMaxSize: sizeMiB must be greater than 0, using default value: ", defaultMaxSizeBytes)
 	} else {
 		maxSize = int64(sizeMiB) << (10 * 2) // MiB to Byte
 	}
