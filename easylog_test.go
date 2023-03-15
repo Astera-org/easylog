@@ -2,6 +2,7 @@ package easylog
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -49,8 +50,17 @@ func setUpTest(t *testing.T) {
 	assert.NoError(t, Init(logFilePath))
 }
 
+func assertPanics(t *testing.T, f func()) {
+	defer func() {
+		assert.NotNil(t, recover(), "The code did not panic")
+	}()
+	f()
+}
+
 func TestBasic(t *testing.T) {
 	setUpTest(t)
+
+	assert.Equal(t, logger, Logger())
 
 	SetLevel(INFO)
 	assert.Equal(t, INFO, GetLevel())
@@ -63,8 +73,8 @@ func TestBasic(t *testing.T) {
 	Warnf("%s", "ccc")
 	Error("DDD")
 	Errorf("%s", "ddd")
-	Fatal("EEE")
-	Fatalf("%s", "eee")
+	assertPanics(t, func() { Fatal("EEE") })
+	assertPanics(t, func() { Fatalf("%s", "eee") })
 
 	logFile, err := os.Open(filePath)
 	require.NoError(t, err)
@@ -155,4 +165,8 @@ func TestRace(t *testing.T) {
 	for i := 0; i < 1000; i++ {
 		Info("BBB")
 	}
+}
+
+func TestCheck(t *testing.T) {
+	assertPanics(t, func() { check(errors.New("yo")) })
 }
