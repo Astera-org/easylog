@@ -50,6 +50,9 @@ func logAt(l LogLevel, a ...any) {
 	sprintArgs = append(sprintArgs, a...)
 	msg := fmt.Sprint(sprintArgs...)
 	logger.Output(3, msg)
+	if l == FATAL {
+		panic(msg)
+	}
 }
 
 func logAtf(l LogLevel, format string, a ...any) {
@@ -59,6 +62,9 @@ func logAtf(l LogLevel, format string, a ...any) {
 	check(checkFile(false))
 	msg := fmt.Sprintf("%s: %s", levelFmt[l], fmt.Sprintf(format, a...))
 	logger.Output(3, msg)
+	if l == FATAL {
+		panic(msg)
+	}
 }
 
 func Debug(a ...any) {
@@ -79,7 +85,6 @@ func Error(a ...any) {
 
 func Fatal(a ...any) {
 	logAt(FATAL, a...)
-	// TODO: panic?
 }
 
 func Debugf(format string, a ...any) {
