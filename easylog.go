@@ -41,24 +41,26 @@ func check(err error) {
 	}
 }
 
-func logAt(l LogLevel, a ...any) {
+func logAt(l LogLevel, a ...any) string {
 	if l < level {
-		return
+		return ""
 	}
 	check(checkFile(false))
 	sprintArgs := []interface{}{levelFmt[l], ": "}
 	sprintArgs = append(sprintArgs, a...)
 	msg := fmt.Sprint(sprintArgs...)
 	logger.Output(3, msg)
+	return msg
 }
 
-func logAtf(l LogLevel, format string, a ...any) {
+func logAtf(l LogLevel, format string, a ...any) string {
 	if l < level {
-		return
+		return ""
 	}
 	check(checkFile(false))
 	msg := fmt.Sprintf("%s: %s", levelFmt[l], fmt.Sprintf(format, a...))
 	logger.Output(3, msg)
+	return msg
 }
 
 func Debug(a ...any) {
@@ -78,8 +80,7 @@ func Error(a ...any) {
 }
 
 func Fatal(a ...any) {
-	logAt(FATAL, a...)
-	// TODO: panic?
+	panic(logAt(FATAL, a...))
 }
 
 func Debugf(format string, a ...any) {
@@ -99,7 +100,7 @@ func Errorf(format string, a ...any) {
 }
 
 func Fatalf(format string, a ...any) {
-	logAtf(FATAL, format, a...)
+	panic(logAtf(FATAL, format, a...))
 }
 
 func checkFile(locked bool) error {
